@@ -2,12 +2,13 @@ class Window:
     SIZE = (1280, 720)
 
 class Player:
-    SIZE = (10, 30)
+    SIZE = (25, 40)
     COLOR = (255,255,255)
-    MOVE_SPEED = 3
+    MOVE_SPEED = 4
     JUMP_FORCE = 8
     JUMP_CONTROL = .2
-    
+    DASH_SPEED = 15
+    DASH_FALLOFF = 0.7
 class Physics:
     GRAVITY = .25
     TERMINAL_VELOCITY = 15
@@ -19,7 +20,11 @@ class Input:
     LEFT, RIGHT, UP, DOWN = (0, 1, 2 ,3)
 
 class Platforms:
-    SEGMENT_SIZE = 20
+    SEGMENT_SIZE = 25
     COLOR = (0,255,255)
-    GAP = 3
+    GAP = 4
     TOTAL_PLATFORMS = 10
+
+class Wall:
+    COLOR = (255,0,0)
+    CHANCE = 100

@@ -1,0 +1,67 @@
+from typing import Any
+import pygame
+from pygame.sprite import Sprite
+import constants
+from constants import Platforms, Window, Wall as WallConst
+from pygame import Vector2
+import math 
+import random
+
+class Platform(Sprite):
+    def __init__(self, pos: Vector2, segments: int, speed : int, obstacleGroup : pygame.sprite.Group, wall : pygame.sprite.Group) -> None:
+        super().__init__()
+        pos.y = round(pos.y / (Platforms.SEGMENT_SIZE * Platforms.GAP)) * Platforms.SEGMENT_SIZE * Platforms.GAP
+        self.obstacleGroup = obstacleGroup
+        self.speed = speed
+        self.segments = segments
+        self.image = pygame.Surface((Platforms.SEGMENT_SIZE * segments, Platforms.SEGMENT_SIZE))
+        self.image.fill(Platforms.COLOR)
+        pygame.draw.rect(self.image,
+                         Platforms.COLOR,
+                         pygame.Rect(pos, (Platforms.SEGMENT_SIZE * segments, Platforms.SEGMENT_SIZE)))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.oldRect = self.rect.copy()
+        self.oldTime = 0
+        if random.randint(0,100) < WallConst.CHANCE:
+            wall.add(Wall(pos, random.randint(0,segments - 1), self))
+
+    def update(self) -> None:
+        self.oldRect = self.rect.copy()
+        self.rect.x -= self.speed
+        collidingPlatforms = pygame.sprite.spritecollide(self, self.obstacleGroup, False)
+        for platform in (platform for platform in collidingPlatforms if platform is not self and isinstance(platform, Platform)):
+            if self.rect.x >= platform.rect.x:
+                if pygame.time.get_ticks() - self.oldTime < 50:
+                    self.kill()
+                    print("bleh")
+                self.rect.left = platform.rect.right
+                self.oldTime = pygame.time.get_ticks()
+                print("bonk")
+                tempSpeed = self.speed
+                self.speed = platform.speed
+                platform.speed = tempSpeed
+        if self.rect.right < 0:
+            self.kill()
+        return super().update()
+
+class Wall(Sprite):
+    def __init__(self, platformCoords : tuple[int, int], segment : int, platform : Platform):
+        super().__init__()
+        pos = (platform.rect.left + Platforms.SEGMENT_SIZE * segment, platform.rect.top - Platforms.SEGMENT_SIZE * 2)
+        self.image = pygame.Surface((Platforms.SEGMENT_SIZE, Platforms.SEGMENT_SIZE * 2))
+        self.image.fill(WallConst.COLOR)
+        self.rect = self.image.get_rect()
+        self.oldRect = self.rect.copy()
+        self.platform = platform
+        self.rect.left = self.platform.rect.left + Platforms.SEGMENT_SIZE * segment
+        self.rect.bottom = self.platform.rect.top
+        self.speed = self.platform.speed
+        self.segment = segment
+
+    def update(self):
+        self.oldRect = self.rect.copy()
+        self.speed = self.platform.speed
+        self.rect.topleft = (self.platform.rect.left + Platforms.SEGMENT_SIZE * self.segment, self.platform.rect.top - Platforms.SEGMENT_SIZE * 2)
+        if self.rect.right < 0 or not self.platform.alive():
+            self.kill()
