@@ -1,9 +1,10 @@
 import pygame
 from pygame.sprite import Sprite
 import constants
-from constants import Physics, Input, Window
+from constants import Physics, Input, Window, Platforms
 from pygame import Vector2
 from obstacles import Platform, Wall
+import math
 class Player(Sprite):
     def __init__(self, pos: Vector2) -> None:
         super().__init__()
@@ -26,32 +27,38 @@ class Player(Sprite):
         self.startCoyote = 0
         self.dashVel = 0
         self.oldRect = self.rect.copy()
+        self.swinging = False
+        self.swingStart = 0
 
-    def update(self, events: list[pygame.event.Event], platforms: pygame.sprite.Group, walls: pygame.sprite.Group):
+    def update(self, events: list[pygame.event.Event], platforms: pygame.sprite.Group, walls: pygame.sprite.Group, baseballs: pygame.sprite.Group):
         self.oldRect = self.rect.copy()
         self.velocity.y += (Physics.GRAVITY if self.velocity.y < Physics.TERMINAL_VELOCITY and not self.grounded else 0)
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     self.pressedKeys[Input.LEFT] = True
-                if event.key == pygame.K_d:
+                elif event.key == pygame.K_d:
                     self.pressedKeys[Input.RIGHT] = True
-                if event.key == pygame.K_SPACE and (self.canDouble or self.canCoyote):
+                elif event.key == pygame.K_SPACE and (self.canDouble or self.canCoyote):
                     self.pressedKeys[Input.UP] = True
                     self.velocity.y = 0
                     self.velocity.y -= constants.Player.JUMP_FORCE
                     self.grounded = False
                     self.canDouble = False if self.canCoyote == False else self.canDouble
                     self.canCoyote = False
-                if event.key == pygame.K_LSHIFT and self.canDash:
+                elif event.key == pygame.K_LSHIFT and self.canDash:
                     self.dashVel = constants.Player.DASH_SPEED
                     self.canDash = False
+                elif event.key == pygame.K_RETURN and pygame.time.get_ticks() - self.swingStart > constants.Player.SWING_COOLDOWN:
+                    print("swing start")
+                    self.swinging = True
+                    self.swingStart = pygame.time.get_ticks()
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     self.pressedKeys[Input.LEFT] = False
-                if event.key == pygame.K_d:
+                elif event.key == pygame.K_d:
                     self.pressedKeys[Input.RIGHT] = False
-                if event.key == pygame.K_SPACE:
+                elif event.key == pygame.K_SPACE:
                     self.pressedKeys[Input.UP] = False
 
         self.xInput = 0 if self.pressedKeys[Input.LEFT] == self.pressedKeys[Input.RIGHT] else -1 if self.pressedKeys[Input.LEFT] else 1
@@ -82,6 +89,10 @@ class Player(Sprite):
         if self.dashVel < 0:
             self.dashVel = 0
 
+        if self.swinging and pygame.time.get_ticks() - self.swingStart > constants.Player.SWING_TIME:
+            self.swinging = False
+            print("swing joever")
+
         if self.canCoyote and pygame.time.get_ticks() > self.startCoyote + Physics.COYOTE_TIME:
             self.canCoyote = False
             # print("COYOTE OVER")
@@ -91,6 +102,9 @@ class Player(Sprite):
         if self.rect.right > Window.SIZE[0]:
             self.rect.right = Window.SIZE[0]
 
+        self.collisions(baseballs, walls, platforms)
+
+    def collisions(self, baseballs, walls, platforms) -> None:
         collidingPlatforms = pygame.sprite.spritecollide(self, platforms, False)
         for platform in collidingPlatforms:
             if self.rect.right >= platform.rect.left and self.oldRect.right <= platform.oldRect.left:
@@ -119,7 +133,7 @@ class Player(Sprite):
             elif self.rect.top <= platform.rect.bottom and self.oldRect.top >= platform.oldRect.bottom:
                 self.rect.top = platform.rect.bottom
                 self.velocity.y = 0
-                
+
         collidingWalls = pygame.sprite.spritecollide(self, walls, False)
         for wall in collidingWalls:
             if self.rect.right > wall.rect.left and self.oldRect.right <= wall.oldRect.left:
@@ -149,3 +163,11 @@ class Player(Sprite):
             elif self.rect.top <= wall.rect.bottom and self.oldRect.top >= wall.oldRect.bottom:
                 self.rect.top = wall.rect.bottom
                 self.velocity.y = 0
+
+        collidingBaseballs = pygame.sprite.spritecollide(self, baseballs, False)
+        for baseball in collidingBaseballs:
+            if not self.swinging or baseball.rect.left < self.rect.centerx:
+                print("oof ouch owie")
+            else:
+                angleTo = math.sqrt(abs(baseball.rect.left - self.rect.right) + abs(baseball.rect.bottom - (self.rect.bottom - (Platforms.SEGMENT_SIZE * 0.6))))
+                baseball.hit(angleTo)

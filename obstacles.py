@@ -2,7 +2,7 @@ from typing import Any
 import pygame
 from pygame.sprite import Sprite
 import constants
-from constants import Platforms, Window, Wall as WallConst
+from constants import Platforms, Window, Wall as WallConst, Balls
 from pygame import Vector2
 import math 
 import random
@@ -65,3 +65,24 @@ class Wall(Sprite):
         self.rect.topleft = (self.platform.rect.left + Platforms.SEGMENT_SIZE * self.segment, self.platform.rect.top - Platforms.SEGMENT_SIZE * 2)
         if self.rect.right < 0 or not self.platform.alive():
             self.kill()
+
+class Baseball(Sprite):
+    def __init__(self, y : int):
+        super().__init__()
+        y = round(y / (Platforms.SEGMENT_SIZE * Platforms.GAP)) * Platforms.SEGMENT_SIZE * Platforms.GAP + (Platforms.SEGMENT_SIZE * (Platforms.GAP - 1))
+        self.image = pygame.Surface(Balls.SIZE)
+        self.image.fill(Balls.COLOR)
+        self.rect = self.image.get_rect()
+        self.rect.centery = y
+        self.rect.left = Window.SIZE[0]
+        self.velocity = Vector2(Balls.SPEED, 0)
+
+    def update(self):
+        # pygame.draw.line(screen, (255,0,0), (0,self.rect.centery), (Window.SIZE[0], self.rect.centery), 1)
+        self.rect.center -= self.velocity
+        if self.rect.y > Window.SIZE[1] or self.rect.y < 0 or Window.SIZE[0] < self.rect.x or self.rect.x < 0:
+            self.kill()
+    def hit(self, angle : float):
+        self.velocity.rotate_ip(angle + random.uniform(-Balls.ANGLE_VARIANCE, Balls.ANGLE_VARIANCE))
+        self.velocity.scale_to_length(Balls.HIT_SPEED)
+        

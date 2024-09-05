@@ -1,6 +1,6 @@
 import pygame
 from constants import Window, Platforms
-from obstacles import Platform
+from obstacles import Platform, Baseball
 from player import Player
 import random
 import time
@@ -21,6 +21,7 @@ player = Player((0,0))
 allSprites = pygame.sprite.Group()
 platforms = pygame.sprite.Group()
 walls = pygame.sprite.Group()
+balls = pygame.sprite.Group()
 allSprites.add(player)
 while len(platforms.sprites()) < Platforms.TOTAL_PLATFORMS:
             x = random.randint(0, Window.SIZE[0])
@@ -37,8 +38,15 @@ def summonPlatforms():
             y = random.randint(0, Window.SIZE[1])
             platforms.add(Platform(pygame.Vector2(x,y), random.randint(3, 15), random.randint(2, 5), platforms, walls))
         time.sleep(0)
+def summonBaseballs():
+    while 1:
+        print('wah')
+        balls.add(Baseball(random.randint(0,Window.SIZE[1])))
+        time.sleep(random.uniform(1,3))
 platformThread = threading.Thread(target=summonPlatforms)
 platformThread.start()
+baseballThread = threading.Thread(target=summonBaseballs)
+baseballThread.start()
 
 while not gameover:  # GAME LOOP############################################################
     clock.tick(60)  # FPS
@@ -52,10 +60,12 @@ while not gameover:  # GAME LOOP################################################
     screen.fill((0, 0, 0))  # wipe screen so it doesn't smear
     platforms.update()
     walls.update()
-    player.update(gameEvents, platforms, walls)
+    player.update(gameEvents, platforms, walls, balls)
     walls.draw(screen)
     platforms.draw(screen)
     allSprites.draw(screen)
+    balls.update()
+    balls.draw(screen)
     
     pygame.display.flip()  # this actually puts the pixel on the screen
 # end game loop------------------------------------------------------------------------------

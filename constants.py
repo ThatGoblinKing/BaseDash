@@ -9,6 +9,8 @@ class Player:
     JUMP_CONTROL = .2
     DASH_SPEED = 15
     DASH_FALLOFF = 0.7
+    SWING_TIME = 200 #Milliseconds
+    SWING_COOLDOWN = 500
 class Physics:
     GRAVITY = .25
     TERMINAL_VELOCITY = 15
@@ -27,4 +29,11 @@ class Platforms:
 
 class Wall:
     COLOR = (255,0,0)
-    CHANCE = 100
+    CHANCE = 10
+    
+class Balls:
+    ANGLE_VARIANCE = 25
+    SPEED = 5
+    HIT_SPEED = -20
+    SIZE = (15, 15)
+    COLOR = (255,0,0)
