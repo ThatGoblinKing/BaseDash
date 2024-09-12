@@ -11,6 +11,7 @@ import threading
 pygame.init()
 pygame.display.set_caption("Base Dash")  # sets the window title
 screen = pygame.display.set_mode(Window.SIZE)  # creates game screen
+spriteSurf = pygame.Surface(Window.SIZE)
 screen.fill((0, 0, 0))
 clock = pygame.time.Clock()  # set up clock
 gameover = False  # variable to run our game loop
@@ -52,14 +53,16 @@ while not gameover:  # GAME LOOP################################################
             gameover = True
     # RENDER Section--------------------------------------------------------------------------------a
     screen.fill((0, 0, 0))  # wipe screen so it doesn't smear
+    spriteSurf.fill((0,0,0))
     platforms.update()
     walls.update()
     player.update(gameEvents, platforms, walls, balls)
-    balls.update(screen)
-    walls.draw(screen)
-    platforms.draw(screen)
-    allSprites.draw(screen)
-    balls.draw(screen)
+    balls.update(spriteSurf)
+    walls.draw(spriteSurf)
+    platforms.draw(spriteSurf)
+    allSprites.draw(spriteSurf)
+    balls.draw(spriteSurf)
+    screen.blit(spriteSurf, (random.uniform(0,10),random.uniform(0,10)))
     pygame.display.flip()  # this actually puts the pixel on the screen
 # end game loop------------------------------------------------------------------------------
 pygame.quit()

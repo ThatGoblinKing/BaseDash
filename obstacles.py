@@ -90,6 +90,8 @@ class Base(Wall):
 class Baseball(Sprite):
     def __init__(self, y : int):
         super().__init__()
+        for frame in Balls.FRAMES:
+            frame.set_colorkey((255,0,255))
         y = round(y / (Platforms.SEGMENT_SIZE * Platforms.GAP)) * Platforms.SEGMENT_SIZE * Platforms.GAP + (Platforms.SEGMENT_SIZE * (Platforms.GAP - 1))
         self.image = Balls.FRAMES[0]
         self.rect = self.image.get_rect()
