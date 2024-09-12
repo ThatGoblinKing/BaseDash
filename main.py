@@ -6,10 +6,7 @@ import random
 import time
 import threading
 #TODO
-# Baseballs
-# Hit the baseballs
-# Bases
-# Walls
+# Bases 
 
 pygame.init()
 pygame.display.set_caption("Base Dash")  # sets the window title
@@ -26,9 +23,7 @@ allSprites.add(player)
 while len(platforms.sprites()) < Platforms.TOTAL_PLATFORMS:
             x = random.randint(0, Window.SIZE[0])
             y = random.randint(0, Window.SIZE[1])
-            platforms.add(Platform(pygame.Vector2(x,y), random.randint(3, 15), random.randint(2, 5), platforms, walls))
-# for i in range(0, Window.SIZE[1], 60):
-#      platforms.add(Platform(pygame.Vector2(Window.SIZE[0], i), 10, 5, platforms))
+            platforms.add(Platform(pygame.Vector2(x,y), random.randint(3, 15), random.randint(2,5), platforms, walls))
 
 
 def summonPlatforms():
@@ -40,7 +35,6 @@ def summonPlatforms():
         time.sleep(0)
 def summonBaseballs():
     while 1:
-        print('wah')
         balls.add(Baseball(random.randint(0,Window.SIZE[1])))
         time.sleep(random.uniform(1,3))
 platformThread = threading.Thread(target=summonPlatforms)
@@ -61,12 +55,11 @@ while not gameover:  # GAME LOOP################################################
     platforms.update()
     walls.update()
     player.update(gameEvents, platforms, walls, balls)
+    balls.update(screen)
     walls.draw(screen)
     platforms.draw(screen)
     allSprites.draw(screen)
-    balls.update()
     balls.draw(screen)
-    
     pygame.display.flip()  # this actually puts the pixel on the screen
 # end game loop------------------------------------------------------------------------------
 pygame.quit()
