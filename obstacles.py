@@ -13,7 +13,13 @@ class Platform(Sprite):
         self.speed = speed
         self.segments = segments
         self.image = pygame.Surface((Platforms.SEGMENT_SIZE * segments, Platforms.SEGMENT_SIZE))
-        self.image.fill(Platforms.COLOR)
+        platform_color = random.randint(0,4)
+        self.image.blit(Platforms.TILEMAP, (0,0), (0, (25 * platform_color), 25, 25))
+        for i in range(segments - 2):
+            self.image.blit(Platforms.TILEMAP, (25 * (i + 1),0), (25 * random.randrange(1,3), (25 * platform_color), 25, 25))
+        self.image.blit(Platforms.TILEMAP,
+                        (25 * (segments - 1), 0),
+                        (100, (25 * platform_color), 25, 25))
         pygame.draw.rect(self.image,
                          Platforms.COLOR,
                          pygame.Rect(pos, (Platforms.SEGMENT_SIZE * segments, Platforms.SEGMENT_SIZE)))
@@ -103,12 +109,12 @@ class Baseball(Sprite):
 
     def update(self, screen: pygame.Surface):
         self.afterImages.insert(0, self.rect.topleft)
-        self.afterImages.pop(4)
+        self.afterImages.pop(len(self.afterImages) - 1)
         self.currentFrame = 0 if self.currentFrame >= 3 else self.currentFrame + 0.25
-        afterImage = Balls.FRAMES[int(self.currentFrame)].copy()
-        afterImage.convert_alpha(screen)
+        afterImage = Balls.AFTER_IMAGE.copy()
+        afterImage.convert_alpha()
         for i in range(len(self.afterImages)):
-            afterImage.set_alpha(i / (i+1))
+            afterImage.set_alpha(200 / (i+1))
             screen.blit(afterImage, self.afterImages[i])
         self.image = Balls.FRAMES[int(self.currentFrame)]
         self.rect.center -= self.velocity
@@ -117,5 +123,4 @@ class Baseball(Sprite):
     def hit(self, angle : float):
         self.velocity.rotate_ip(angle + random.uniform(-Balls.ANGLE_VARIANCE, Balls.ANGLE_VARIANCE))
         self.velocity.scale_to_length(Balls.HIT_SPEED)
-        if self.velocity.x < 0:
-            self.velocity.x *= 1
+        self.velocity.x = -abs(self.velocity.x)

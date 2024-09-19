@@ -29,6 +29,7 @@ class Platforms:
     COLOR = (0,255,255)
     GAP = 4
     TOTAL_PLATFORMS = 10
+    TILEMAP = pygame.image.load("Platforms.png")
 
 class Wall:
     COLOR = (255,0,0)
@@ -40,8 +41,9 @@ class Balls:
     HIT_SPEED = -20
     SIZE = (15, 15)
     COLOR = (255,0,0)
-    AFTER_IMAGE_COUNT = 4
+    AFTER_IMAGE_COUNT = 5
     FRAMES = [pygame.image.load('BaseballSpriteSheet.png').subsurface((15 * i, 0 ), (15,15)) for i in range(4)]
+    AFTER_IMAGE : pygame.Surface = pygame.image.load('afterimage.png')
 
 class Bases:
     COLOR = (0,255,0)

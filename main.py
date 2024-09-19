@@ -1,4 +1,5 @@
 import pygame
+import pygame.locals
 from constants import Window, Platforms
 from obstacles import Platform, Baseball
 from player import Player
@@ -21,6 +22,7 @@ platforms = pygame.sprite.Group()
 walls = pygame.sprite.Group()
 balls = pygame.sprite.Group()
 allSprites.add(player)
+jitter = pygame.Vector2(0,0)
 while len(platforms.sprites()) < Platforms.TOTAL_PLATFORMS:
             x = random.randint(0, Window.SIZE[0])
             y = random.randint(0, Window.SIZE[1])
@@ -62,7 +64,8 @@ while not gameover:  # GAME LOOP################################################
     platforms.draw(spriteSurf)
     allSprites.draw(spriteSurf)
     balls.draw(spriteSurf)
-    screen.blit(spriteSurf, (random.uniform(0,10),random.uniform(0,10)))
+    spriteSurf = pygame.transform.scale(spriteSurf, Window.SIZE)
+    screen.blit(spriteSurf, (jitter.x, jitter.y))
     pygame.display.flip()  # this actually puts the pixel on the screen
 # end game loop------------------------------------------------------------------------------
 pygame.quit()
